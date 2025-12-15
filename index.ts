@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
-import { MongoClient, Db } from "mongodb";
+import { MongoClient } from "mongodb";
+
+import userRouter from "./routes/users";
 
 const app = express();
 app.use(express.json());
@@ -10,12 +12,16 @@ const client: MongoClient = new MongoClient(uri);
 async function start(): Promise<void> {
   try {
     await client.connect();
+    const db = client.db("detyre");
+    app.locals.db = db;
+
     console.log("Connected to MongoDB");
 
     app.get("/", (_req: Request, res: Response) => {
       res.send("Hello World!");
     });
-    // e bona _req since it is never used to silence warnings (usually se kishim shkrujt qashtu)
+
+    app.use("/users", userRouter);
 
     app.listen(3000, () => console.log("Server running on port 3000"));
   } catch (err) {
